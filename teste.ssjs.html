@@ -1,22 +1,35 @@
 <script runat="server">
-    var email = Row["email"];
-    var celular = Row["celular"];
+    // Defina o nome da Data Extension de origem
+    var sourceDE = "Source_DE";
     
-    // Função para gerar SHA256
-    function SHA256(s) {
-        var sha256 = require('crypto').createHash('sha256');
-        return sha256.update(s).digest('hex');
+    // Use LookupRows para obter todas as linhas da DE
+    var rows = DataExtension.Init(sourceDE).Rows.Retrieve();
+    
+    // Iterar sobre cada linha da DE
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        
+        // Extrair os valores de email e celular de cada linha
+        var email = row["email"];
+        var celular = row["celular"];
+        
+        // Função para criptografar usando SHA256
+        function SHA256(s) {
+            var crypto = require('crypto');
+            var sha256 = crypto.createHash('sha256');
+            return sha256.update(s).digest('hex');
+        }
+        
+        // Criptografando os campos
+        var email_cripto = SHA256(email);
+        var celular_cripto = SHA256(celular);
+        
+        // Agora, armazene os dados criptografados na DE de destino
+        var destinationDE = DataExtension.Init("Destination_DE");
+        destinationDE.Rows.Add({
+            "cd_cliente": row["cd_cliente"],  // Copiar o cd_cliente da DE de origem
+            "email_criptografado": email_cripto,
+            "celular_criptografado": celular_cripto
+        });
     }
-    
-    // Criptografando os campos
-    var email_cripto = SHA256(email);
-    var celular_cripto = SHA256(celular);
-    
-    // Inserindo os valores criptografados na DE de destino
-    var dataExtension = DataExtension.Init("Destination_DE");
-    dataExtension.Rows.Add({ 
-        "cd_cliente": Row["cd_cliente"], 
-        "email_criptografado": email_cripto, 
-        "celular_criptografado": celular_cripto 
-    });
 </script>
