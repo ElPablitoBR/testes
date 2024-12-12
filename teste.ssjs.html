@@ -1,0 +1,22 @@
+<script runat="server">
+    var email = Row["email"];
+    var celular = Row["celular"];
+    
+    // Função para gerar SHA256
+    function SHA256(s) {
+        var sha256 = require('crypto').createHash('sha256');
+        return sha256.update(s).digest('hex');
+    }
+    
+    // Criptografando os campos
+    var email_cripto = SHA256(email);
+    var celular_cripto = SHA256(celular);
+    
+    // Inserindo os valores criptografados na DE de destino
+    var dataExtension = DataExtension.Init("Destination_DE");
+    dataExtension.Rows.Add({ 
+        "cd_cliente": Row["cd_cliente"], 
+        "email_criptografado": email_cripto, 
+        "celular_criptografado": celular_cripto 
+    });
+</script>
